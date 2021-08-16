@@ -1,0 +1,10 @@
+#Remove Build results and temp directories
+[Dd]ebug/
+[Rr]elease/
+.vs/
+
+#No need to keep temp m3u8 file
+temp.m3u8
+
+//But we can keep the application output
+!/[Rr]elease/hls-playlist-parser.exe
