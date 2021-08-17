@@ -3,8 +3,5 @@
 [Rr]elease/
 .vs/
 
-#No need to keep temp m3u8 file
-temp.m3u8
-
-//But we can keep the application output
-!/[Rr]elease/hls-playlist-parser.exe
+#No need to keep m3u8 files from builds
+*.m3u8
