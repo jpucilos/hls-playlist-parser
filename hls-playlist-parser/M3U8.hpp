@@ -24,14 +24,60 @@ private:
 	struct PlaylistTag
 	{
 		std::string tag;
-		//Note: by using a map here the attributes are sorted alphabetically as they're inserted
-		std::map<std::string, std::string> attributeList;
+		std::vector<std::pair<std::string, std::string>>attributeList;
 		std::string uri;
 
+		//Comparator so that we can sort values based on attribute
+		bool operator < (const PlaylistTag& tag) const
+		{
+			std::string valueLeft;
+			std::string valueRight;
+
+			//Let's find this tag's attribute value
+			for (size_t i = 0; i < attributeList.size(); i++)
+			{
+				if (attributeList[i].first.compare(m_attributeToSort) == 0)
+				{
+					valueLeft = attributeList[i].second;
+				}
+			}
+
+			//Now let's find the tag we're comaring to's attribute value
+			for (size_t i = 0; i < tag.attributeList.size(); i++)
+			{
+				if (tag.attributeList[i].first.compare(m_attributeToSort) == 0)
+				{
+					valueRight = tag.attributeList[i].second;
+				}
+			}
+
+			//Check if value wasn't found in either direction before checking which value is greater
+			if (valueLeft.empty() && !valueRight.empty())
+			{
+				return true;
+			}
+			else if (!valueLeft.empty() && valueRight.empty())
+			{
+				return false;
+			}
+			else
+			{
+				//Check if we're dealing with strings or ints
+				char* isNotAnInteger;
+				long convertedIntLeft = strtol(valueLeft.c_str(), &isNotAnInteger, 10);
+				if (isNotAnInteger)
+				{
+					long convertedIntRight = strtol(valueRight.c_str(), &isNotAnInteger, 10);
+					return convertedIntLeft < convertedIntRight;
+				}
+				return valueLeft < valueRight;
+			}
+		}
 	};
 
 	std::vector<PlaylistTag> m_playListData;
-	
+	static std::string m_attributeToSort;
+
 public:
 
 	//Default constructor
@@ -46,10 +92,11 @@ public:
 	//Method for writing data back out to a file
 	void writeToFile(std::ofstream& outFile);
 	
+	//Method for sorting a file based on Attribute Value
+	void sortPlaylist(const std::string& attribute);
+
 	//Default Destructor
 	~M3U8();
-	
-	//
 	
 };
 #endif

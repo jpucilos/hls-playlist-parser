@@ -12,7 +12,11 @@
 */
 #include "M3U8.hpp"
 #include <sstream>
+#include <algorithm>
 
+//Set up our static attribute to sort variable
+std::string M3U8::m_attributeToSort;
+ 
 //Constructor that takes an file as input
 M3U8::M3U8(std::ifstream& inFile) {
 	parsePlaylistFile(inFile);
@@ -26,7 +30,6 @@ void M3U8::parsePlaylistFile(std::ifstream& inFile)
 	while (std::getline(inFile, line))
 	{
 		//Check if this is a valid tag, i.e. begins with #EXT
-		//TODO - confirm with interviewer that this is valid, as this operation will remove comments from the playlist file as well as blank lines
 		if (line.substr(0, 4).compare("#EXT") == 0)
 		{
 			//Create temporary tag along with a variable to track index of the string
@@ -47,7 +50,7 @@ void M3U8::parsePlaylistFile(std::ifstream& inFile)
 					{
 						//This is the case for tags such as #EXT-X-VERSION:<n>, we can consider the key to be empty for tags like these
 						std::string emptyString = "";
-						temp.attributeList.insert(std::pair<std::string, std::string>(emptyString, line));
+						temp.attributeList.push_back(std::pair<std::string, std::string>(emptyString, line));
 						break;
 					}
 					else
@@ -61,7 +64,7 @@ void M3U8::parsePlaylistFile(std::ifstream& inFile)
 						if (tempIndex == std::string::npos)
 						{
 							//We've reached the end of the atrribute list, add entry and break
-							temp.attributeList.insert(std::pair<std::string, std::string>(tempKey, line));
+							temp.attributeList.push_back(std::pair<std::string, std::string>(tempKey, line));
 							break;
 						}
 						else
@@ -69,7 +72,7 @@ void M3U8::parsePlaylistFile(std::ifstream& inFile)
 							//This isn't the last attribute to process, so let's save a copy of the value temporarily and trim the string
 							std::string tempValue = line.substr(0, tempIndex);
 							line.erase(0, tempIndex + 1);
-							temp.attributeList.insert(std::pair<std::string, std::string>(tempKey, tempValue));
+							temp.attributeList.push_back(std::pair<std::string, std::string>(tempKey, tempValue));
 						}
 					}
 				}
@@ -93,12 +96,13 @@ void M3U8::parsePlaylistFile(std::ifstream& inFile)
 	}
 }
 
-//Method for writing data back out to a file
+//Method for writing data back out to a file, with the option for filtering out tags
+//that don't contain a certain attribute
 void M3U8::writeToFile(std::ofstream& outFile)
 {
 	//Let's iterate through the tags of our playlist data
 	for (auto& it : m_playListData){
-		
+
 		//Start with tag
 		outFile << it.tag;
 		
@@ -128,6 +132,13 @@ void M3U8::writeToFile(std::ofstream& outFile)
 		//Next tag, new line
 		outFile << '\n';
 	}
+}
+
+//Method for sorting a file based on Attribute Value
+void M3U8::sortPlaylist(const std::string& attribute)
+{
+	m_attributeToSort = attribute;
+	std::sort(m_playListData.begin(), m_playListData.end());
 }
 
 //Default, no parameter constructor for our object

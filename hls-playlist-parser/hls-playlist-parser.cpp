@@ -9,6 +9,7 @@
 //Include our object for storing and sorting M3U8 files
 #include "M3U8.hpp"
 
+//In this quick test, we're taking a playlist from a given URL, parsing it, sorting it based on several fields, and then printing it back out to an output file
 int main()
 {
     //The URL to download from 
@@ -27,11 +28,22 @@ int main()
         M3U8 playlistFile(infile);
         infile.close();
 
+        //Sort Tags based on attribute value bandwidth
+        playlistFile.sortPlaylist("BANDWIDTH");
+
         //Write back to new file
-        //Note: the output's attribute lists are already sorted when the playlist object is created, since it uses a map for storage
-        std::ofstream outFile("sortedPlaylist.m3u8");
+        std::ofstream outFile("sortedPlaylistBandwidth.m3u8");
         playlistFile.writeToFile(outFile);
         outFile.close();
+
+        //Sort Tags based on attribute value average bandwidth
+        playlistFile.sortPlaylist("AVERAGE-BANDWIDTH");
+
+        //Write back to new file
+        std::ofstream outFile2("sortedPlaylistAverageBandwidth.m3u8");
+        playlistFile.writeToFile(outFile2);
+        outFile2.close();
+
     }
     else{
         std::cout << "File Fetch unsuccessful" << '\n';
